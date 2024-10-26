@@ -17,7 +17,7 @@ void json_check_not_NULL(cJSON *json, char* error_msg);
 
 void curl_request_build(char *res, char *city_name);
 
-// hunder func from example
+// under func from example
 size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, struct MemoryStruct *userp){
 	size_t realsize = size * nmemb;
 	userp->memory = realloc(userp->memory, userp->size + realsize + 1);
@@ -109,6 +109,7 @@ int main(int argc, char *argv[]){
 					free(json_weather_disc);
 					free(json_windSpeed_string);
 				}
+				free(json_request_array_str);
 				cJSON_Delete(json); // clean json memory
 			}
 		}
