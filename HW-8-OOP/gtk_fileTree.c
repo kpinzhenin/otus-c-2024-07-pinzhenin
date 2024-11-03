@@ -3,8 +3,8 @@
 
 enum
 {
-	SIMPLE_TEXT_COLUMN,
-	ANOTHER_TEXT_COLUMN,
+	FOLDER_TEXT_COLUMN,
+	SIZE_ULONG_COLUMN,
 	N_COLUMNS
 };
  // because all function from example is deprecated
@@ -56,7 +56,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 	window = gtk_application_window_new(app);
 	// set window properties
 	gtk_window_set_title (GTK_WINDOW (window), "Window");
-	gtk_window_set_default_size (GTK_WINDOW (window), 600, 400); // width x height 
+	gtk_window_set_default_size (GTK_WINDOW (window), 400, 400); // width x height 
 #endif
 	//===== initialization grid container
 	grid = gtk_grid_new();
@@ -64,12 +64,16 @@ static void activate(GtkApplication *app, gpointer user_data)
 	gtk_window_set_child(GTK_WINDOW(window), grid);
 
 //======initialization tree (contain only type of column)
-	store = gtk_tree_store_new( N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_tree_store_new( N_COLUMNS, G_TYPE_STRING, G_TYPE_ULONG);
 	// filling the storage
 	store_contain(store, ".", NULL);
 
 //======create a tree view of store
 	GtkWidget *tree = create_tree_view_of_store(store);
+	
+	// unref the store, after keep it in tree
+	g_object_unref(G_OBJECT(store));
+
 	// try append in grid
 	gtk_grid_attach( GTK_GRID(grid), tree, 0,0,1,1);
 
@@ -85,21 +89,21 @@ GtkWidget* create_tree_view_of_store(GtkTreeStore *store)
 	// columns and cell render
 	GtkCellRenderer *renderer;
 	renderer = gtk_cell_renderer_text_new(); // what doesn't mean...?
+
 // create column view
 
 	GtkTreeViewColumn *column;
 	column = gtk_tree_view_column_new_with_attributes( "Folder name", renderer,
-						     "text", SIMPLE_TEXT_COLUMN,
+						     "text", FOLDER_TEXT_COLUMN,
 						     NULL);
 	gtk_tree_view_append_column( GTK_TREE_VIEW( tree), column );
 
-// add new column view
-#if 0
-	column = gtk_tree_view_column_new_with_attributes( "Folder properties", renderer,
-						     "text", ANOTHER_TEXT_COLUMN,
+//	renderer = gtk_cell_renderer_spin_new(); // for numeric field
+	column = gtk_tree_view_column_new_with_attributes( "Size (byte)", renderer,
+						     "text", SIZE_ULONG_COLUMN,
 						     NULL);
 	gtk_tree_view_append_column( GTK_TREE_VIEW( tree), column );
-#endif	
+	
 	return tree;
 }
 
@@ -114,22 +118,24 @@ static void store_contain(GtkTreeStore *store,
 	GError *error = NULL;
 	GDir *dir = g_dir_open(dir_path, 0, &error);
 	
-	const gchar *filename;
-	while(filename = g_dir_read_name(dir))
+	const gchar *file_name;
+	while(file_name = g_dir_read_name(dir))
 	{
-		gchar *file_full_path = g_build_filename(dir_path, filename, NULL);
-		gtk_tree_store_append( store, &iter, parent_iter);
-		gtk_tree_store_set( store, &iter,
-			SIMPLE_TEXT_COLUMN, filename,
-			ANOTHER_TEXT_COLUMN, "f_field_content",
-			-1);
-		
+		gchar *file_full_path = g_build_filename(dir_path, file_name, NULL);
 		struct stat file_stat;
 		stat(file_full_path, &file_stat);
 
+		gtk_tree_store_append( store, &iter, parent_iter);
+		gtk_tree_store_set( store, &iter,
+			FOLDER_TEXT_COLUMN, file_name,
+			SIZE_ULONG_COLUMN, file_stat.st_size,
+			-1);
+
 		if(S_ISDIR(file_stat.st_mode))
 			store_contain(store, file_full_path, &iter);
-
+		
+		// free resource
+		g_free(file_full_path);
 	}
 	g_dir_close(dir);
 }
