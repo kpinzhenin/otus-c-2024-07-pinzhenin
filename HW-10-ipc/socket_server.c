@@ -14,6 +14,7 @@
 #include <sys/resource.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <errno.h>
 
 static void read_config(char *socket_name, char *file_name);
 static unsigned long int get_size_of_file(char *file_name);
@@ -193,7 +194,13 @@ static unsigned long int get_size_of_file(char *file_name)
 	struct stat statbuf;
 	if ( stat(file_name, &statbuf) == -1)
 	{
-		perror("error in stat: ");
+		// handle of errno
+		if (errno == EACCES)
+			perror("don't have the permission: ");
+		if(errno == ENOENT)
+			perror("wrong file address: " );
+		
+		//	perror("error in stat: ");
 		exit(1);
 	}
 	return statbuf.st_size;
