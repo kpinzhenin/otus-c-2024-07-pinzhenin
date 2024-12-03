@@ -17,7 +17,7 @@
 #include <errno.h>
 
 static void read_config(char *socket_name, char *file_name);
-static unsigned long int get_size_of_file(char *file_name);
+static unsigned long int get_size_of_file(char *file_name, int *success_request);
 static int create_server_client(char *sock_name);
 void demonaize(void);
 
@@ -54,30 +54,35 @@ int main(int argc, char *argv[])
 	int server_sock = create_server_client(sock_name);
 
 	// make a listen connection
-	if (listen(server_sock, 0) == -1) // "0" backlog for set min listen queue in system
+	int success_request = 0;
+	while(success_request == 0)
 	{
-		perror("listen error");
-		exit(1);
+		if (listen(server_sock, 0) == -1) // "0" backlog for set min listen queue in system
+		{
+			perror("listen error");
+			exit(1);
+		}
+		
+		// accept link
+		int client_sock = accept(server_sock, NULL, NULL);
+		if (client_sock == -1)
+		{
+			perror("accept");
+			exit(1);
+		}
+/*		
+		unsigned long int file_size = 
+			get_size_of_file(file_name);
+*/
+		// write to client
+//		char *msg = "hello from server";
+		unsigned long int size = get_size_of_file(file_name, &success_request);
+
+		write(client_sock, &size, sizeof(long int));
+
+		close(client_sock);
 	}
-	
-	// accept link
-	int client_sock = accept(server_sock, NULL, NULL);
-	if (client_sock == -1)
-	{
-		perror("accept");
-		exit(1);
-	}
-	unsigned long int file_size = 
-		get_size_of_file(file_name);
-
-	// write to client
-	char *msg = "hello from server";
-	unsigned long int size = get_size_of_file(file_name);
-
-	write(client_sock,&size, sizeof(long int));
-
 	close(server_sock);
-	close(client_sock);
 	unlink(sock_name);
 #endif
 	return 0;
@@ -189,7 +194,7 @@ static void read_config(char *socket_name, char *file_name)
 	fclose(config_fd);
 }
 
-static unsigned long int get_size_of_file(char *file_name)
+static unsigned long int get_size_of_file(char *file_name, int *success_request)
 {
 	struct stat statbuf;
 	if ( stat(file_name, &statbuf) == -1)
@@ -199,9 +204,8 @@ static unsigned long int get_size_of_file(char *file_name)
 			perror("don't have the permission: ");
 		if(errno == ENOENT)
 			perror("wrong file address: " );
-		
-		//	perror("error in stat: ");
-		exit(1);
 	}
+	else
+		*success_request = 1;
 	return statbuf.st_size;
 }
