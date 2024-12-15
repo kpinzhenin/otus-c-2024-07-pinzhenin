@@ -31,39 +31,50 @@ int main(int argc, char *argv[])
 
 	//get the size of file
 	size_t file_size = get_file_size(fd);
-	printf("file_size = %lu\n", file_size);
+//	printf("file_size = %lu\n", file_size);
 
 	// page count 
 	//printf("sysconf pagesize = %lu", sysconf(_SC_PAGE_SIZE));
 	// set page size 
-	size_t page_size = sysconf(_SC_PAGE_SIZE); // replace for expression 
+	size_t page_size = sysconf(_SC_PAGE_SIZE);
 	size_t page_count = ( file_size % page_size  == 0) ?
 		file_size / page_size :
 		(file_size / page_size) + 1;
-	printf("page count = %lu\n", page_count);
+//	printf("page count = %lu\n", page_count);
 //==========================================================
 	// for first read calc size and calc 
 	size_t read_page = 0;
+	uint32_t crc;	
+
+	// test info
+	unsigned char buf[11]; buf[11] = 0;
+#if 0	// print first 10 symbol
 	// read first part
 	unsigned char *mm = mmap( 0 , page_size, PROT_READ, MAP_PRIVATE, fd, 0);
-	// print first 10 symbol
+	uint32_t crc;	
 	unsigned char buf[11]; buf[11] = 0;
 	memcpy(&buf, mm, 10);
-	uint32_t crc = crc32(&buf, 10);
+	crc = crc32(&buf, 10);
 	printf("10 symb from mm first part = %s, crc = %x\n", buf, crc);
 	read_page += 1;
+#endif
 //==========================================================
 	while (file_size > ( read_page * page_size ) )
 	{
 		size_t lenght = file_size - ( read_page * page_size ); 
 		if ( lenght > page_size )
 			lenght = page_size;
-		mm = mmap( 0 , lenght, PROT_READ, MAP_PRIVATE, fd, read_page * page_size);
+
+		unsigned char *mm = mmap( 0 , lenght, PROT_READ, MAP_PRIVATE, fd, read_page * page_size);
 		memcpy(&buf, mm, 10);
-		crc = combine_crc32(crc,(const uint8_t*)&buf, 10);
-		printf("10 symb from mm = %s, crc = %x\n", buf, crc);
+		if (read_page == 0)
+			crc = crc32(&buf, 10);
+		else
+			crc = combine_crc32(crc,(const uint8_t*)&buf, 10);
 		read_page += 1;
 
+		// test info
+		printf("10 symb from mm = %s, crc = %x\n", buf, crc);
 	}
 	
 	// read the first page of file
