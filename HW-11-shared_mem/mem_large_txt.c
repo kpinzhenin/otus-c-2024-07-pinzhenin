@@ -28,10 +28,10 @@ int main(int argc, char *argv[])
 	
 	// take file descriptor
 	int fd = get_file_descriptor( argv[1] );
-
+	printf("file descriptor - ok\n");
 	//get the size of file
 	size_t file_size = get_file_size(fd);
-//	printf("file_size = %lu\n", file_size);
+	//printf("file_size = %lu\n", file_size);
 
 	// page count 
 	//printf("sysconf pagesize = %lu", sysconf(_SC_PAGE_SIZE));
@@ -40,7 +40,6 @@ int main(int argc, char *argv[])
 	size_t page_count = ( file_size % page_size  == 0) ?
 		file_size / page_size :
 		(file_size / page_size) + 1;
-//	printf("page count = %lu\n", page_count);
 //==========================================================
 	// for first read calc size and calc 
 	size_t read_page = 0;
@@ -61,43 +60,30 @@ int main(int argc, char *argv[])
 //==========================================================
 	while (file_size > ( read_page * page_size ) )
 	{
-		size_t lenght = file_size - ( read_page * page_size ); 
-		if ( lenght > page_size )
-			lenght = page_size;
+		size_t length = file_size - ( read_page * page_size ); 
+		if ( length > page_size )
+			length = page_size;
 
-		unsigned char *mm = mmap( 0 , lenght, PROT_READ, MAP_PRIVATE, fd, read_page * page_size);
+		unsigned char *mm = mmap( 0 , length, PROT_READ, MAP_PRIVATE, fd, read_page * page_size);
 		memcpy(&buf, mm, 10);
 		if (read_page == 0)
-			crc = crc32(&buf, 10);
+			//crc = crc32(&buf, 10);
+			crc = crc32(mm, length);
 		else
-			crc = combine_crc32(crc,(const uint8_t*)&buf, 10);
+			//crc = combine_crc32(crc,(const uint8_t*)&buf, 10);
+			crc = combine_crc32(crc,(const uint8_t*)mm, length); // length 
 		read_page += 1;
-
+		munmap( mm, length );
 		// test info
-		printf("10 symb from mm = %s, crc = %x\n", buf, crc);
+		/*printf("read %lu, from size %lu, total page read %lu [%lu] with crc %u\n",
+			       	length, file_size, read_page, (file_size - (read_page * page_size)), crc); */
 	}
-	
+	printf("crc32 = %x\n", crc);
+/*	
 	// read the first page of file
-	unsigned char full_msg[] = "000000000011111111112222222222";
-	 printf("full crc = %x\n", crc32(&full_msg, 30));
-	// try to mem, first read for calc crc 
-#if 0
-	unsigned char *mm = mmap( 0 , 10UL, PROT_READ, MAP_PRIVATE, fd, 0);
-	off_t off = page_size;
-
-	while(read_page < page_count)
-	{
-		mm = mmap( 0 , 10UL, PROT_READ, MAP_PRIVATE, fd, off);
-		read_page += 1;
-		off += page_size;
-	
-		unsigned char buf[11];
-		memcpy(&buf, mm , 10);
-		buf[11] = 0;
-
-		printf("read char =%s\n", buf);
-	}
-#endif	
+	unsigned char full_msg[] = "000000000011111111112222222222\n";
+	 printf("full crc = %x\n", crc32(&full_msg, strlen(full_msg)));
+*/
 	close(fd);
 
 	return 0;
