@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	<!-- <menu id="menu">
+		<section>
+			<item>
+				<attribute name="label" translatable="yes">_Preferences</attribute>
+			</item>
+		</section>
+	</menu> -->
+	<object id="window" class="GtkWindow">
+		<property name="title">Sensors calibration application</property>
+		<property name="default-height">400</property>
+		<property name="default-width">780</property>
+		<child>
+<!-- ===== GtkBox -->
+			<object class="GtkBox" id="horizontal_box">
+				<property name="orientation">horizontal</property>
+				<property name="spacing">5</property>
+				<child>					
+					<object class="GtkBox" id="cmd_box"> <!-- "my_grid"-->
+						<property name="orientation">vertical</property>
+						<property name="spacing">5</property>
+						<!-- lef/right offset-->
+						<property name="margin-start">10</property> 
+						<property name="margin-end">10</property>
+
+						<!-- top/bottom offset-->
+						<property name="margin-top">10</property>
+						<property name="margin-bottom">10</property>
+
+						<!-- ========== Text field -->
+						<child>
+							<object class="GtkFrame" id="cmt_text_frame">
+								<child>
+									<object class="GtkScrolledWindow" id="cmd_text_view_scroll">
+										<child>
+											<object id="textView_out" class="GtkTextView">
+												<!-- textView position setting -->
+												<property name="hexpand">TRUE</property>
+												<property name="vexpand">TRUE</property>
+											<!--	<property name="height-request">200</property> -->
+
+												<!-- set only read field -->
+												<property name="editable">FALSE</property>
+												<property name="cursor-visible">FALSE</property>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+		<!-- ========== Command entry field -->
+						<child>
+							<object id ="entryTxt" class="GtkEntry">
+							</object>
+						</child>
+					</object>					
+				</child>
+				
+				<child>
+					<object class="GtkFrame" id="column_view_frame">
+						<!-- top/bottom offset-->
+						<property name="margin-top">10</property>
+						<property name="margin-bottom">10</property>
+						<child>
+				<!-- -->	<object class="GtkScrolledWindow" id="columnView_scroll">
+								<property name="vexpand">true</property>
+								<property name="hexpand">true</property>
+								<property name="min-content-width">200</property>
+									<child>
+										<object class="GtkColumnView" id="clmn_view">
+											<property name="show-column-separators">TRUE</property>
+										</object>
+							<!---->	</child>
+							</object> 
+						</child>
+					</object>
+				</child>
+
+<!-- ========== Buttons and entryes-->
+				<child>
+					<object class="GtkBox" id="control_grid">
+					
+						<property name="orientation">vertical</property>
+						<property name="spacing">10</property>
+						
+						<!-- lef/right offset-->
+						<property name="margin-start">10</property> 
+						<property name="margin-end">10</property>
+						
+						<!-- top/bottom offset-->
+						<property name="margin-top">10</property>
+						<property name="margin-bottom">10</property>
+
+						<!-- space between element -->
+					<!--	<property name="row-spacing">5</property>
+						<property name="column-spacing">5</property> -->
+
+						<child> <!-- Frame -->
+							<object class="GtkFrame" id="test_Plate">
+								<property name="label">Test widget control panel</property>
+								<child>
+									<object class="GtkGrid" id="test_Plate_grid">										
+										<property name="row-spacing">5</property>
+										<property name="column-spacing">5</property>
+										
+										<!-- lef/right offset-->
+										<property name="margin-start">10</property> 
+										<property name="margin-end">10</property>
+										
+										<!-- top/bottom offset-->
+										<property name="margin-top">10</property>
+										<property name="margin-bottom">10</property>
+										
+											<child>
+												<object class="GtkEntry" id="entry_clmn1">
+													
+													<property name="max-width-chars">4</property>
+													<property name="max-length">4</property>
+													<layout>
+														<property name="column">0</property>
+														<property name="row">0</property>
+													</layout>
+												</object>
+											</child>
+											<child>
+												<object class="GtkEntry" id="entry_clmn2">
+													<property name="max-width-chars">4</property> <!-- "max-length" -->
+													<property name="max-length">4</property>
+													<layout>
+														<property name="column">1</property>
+														<property name="row">0</property>
+													</layout>
+												</object>
+											</child>
+											<child>
+												<object class="GtkEntry" id="entry_clmn3">
+													<property name="max-width-chars">4</property>
+													<property name="max-length">4</property>
+													<layout>
+														<property name="column">2</property>
+														<property name="row">0</property>
+													</layout>
+												</object>
+											</child>
+											<child>
+												<object class="GtkButton" id="do_some_btn">
+													<property name="label">Add entry</property>
+												<!--	<property name="width-request">200</property> -->
+													<layout>
+														<property name="column">3</property>
+														<property name="row">0</property>
+													</layout>
+												</object>
+											</child>
+											<child>
+												<object class="GtkButton" id="test_text_view">
+													<property name="label">Test text view</property>
+													<layout>
+														<property name="column">0</property>
+														<property name="row">1</property>
+														<property name="column-span">4</property>
+													</layout>
+												</object>
+											</child>
+										</object>		
+								</child>									
+							</object>	
+						</child> <!-- end Frame -->
+						
+						
+						<child>
+							<object class="GtkButton" id="btn_contant_from_file">
+								<property name="label">Insert entrys from file</property>
+							<!--	<layout>
+									<property name="column">0</property>
+									<property name="row">2</property>
+									<property name="column-span">4</property>
+								</layout> -->
+							</object>
+						</child>
+						<child>
+							<object class="GtkButton" id="btn_clear_column_view">
+								<property name="label">Clear table</property>
+								<!-- <property name="width-request">200</property> -->
+							<!--	<layout>
+									<property name="column">0</property>
+									<property name="row">3</property>
+									<property name="column-span">4</property>
+								</layout> -->
+							</object>
+						</child>
+						<!-- Quit button-->
+						<child>
+							<object class="GtkButton" id="quit_button">
+								<property name="label">Quit</property>
+								<!-- <property name="width-request">200</property> -->
+							<!--	<layout>
+									<property name="column">0</property>
+									<property name="row">4</property>
+									<property name="column-span">4</property>
+								</layout> -->
+							</object>
+						</child>
+					</object>
+				</child>
+			</object>
+
+		</child>
+	</object>
+</interface>
+
+<!-- <object class="GtkFrame">
+	<child> 
+	</child>
+</object> -->
